@@ -13,7 +13,7 @@ import java.sql.SQLException;
  * @author steve
  */
 public class Menu extends javax.swing.JFrame {
-
+    
     public Connection escribir(){
         Connection con = null;
         try {
