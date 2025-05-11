@@ -11,7 +11,7 @@ package com.mycompany.quizapp;
 public class QuizApp {
     
     public static void main(String[] args) {
-        new Menu().setVisible(true);
+       //ew Menu().setVisible(true);
     }
 }
 
