@@ -4,6 +4,10 @@
  */
 package com.mycompany.quizapp;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import javax.swing.JOptionPane;
 
 /**
@@ -12,6 +16,44 @@ import javax.swing.JOptionPane;
  */
 public class Login extends javax.swing.JFrame {
 
+    String nombre;
+    String codigo;
+    
+    private void login(){
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "INSERT INTO usuario VALUES ('" + codigo + "', '" + nombre + "');";
+
+        
+    }
+    
+    private boolean codigo(){
+        boolean x = false;
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "SELECT id FROM usuario WHERE id = '" + codigo + "';";
+        
+       try {
+           Statement stmt = conn.createStatement();
+           ResultSet rs = stmt.executeQuery(sql); 
+           String sqlcodigo = rs.getString("id");
+           
+           x = codigo == null ? sqlcodigo == null : codigo.equals(sqlcodigo);
+           
+           
+       } catch (SQLException e) { 
+           System.out.println(e.getMessage());
+       }
+        
+        return x;
+    }
+    
+    private void ventana(){
+        JOptionPane.showMessageDialog(rootPane, "Bienvenido");
+        new Menu().setVisible(true);
+        this.setVisible(false);
+    }
+    
     /**
      * Creates new form Login
      */
@@ -137,13 +179,20 @@ public class Login extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
+        nombre = this.jTextField1.getText();
+        codigo = this.jTextField2.getText();
+        
         if(jTextField1.getText().isBlank() || jTextField2.getText().isBlank()){
             JOptionPane.showMessageDialog(rootPane, "Por favor llenar los campos requeridos");
         } else {
-            JOptionPane.showMessageDialog(rootPane, "Bienvenido");
-            new Menu().setVisible(true);
-            this.setVisible(false);
+            if(codigo() == true){
+                ventana();
+            } else {
+                login();
+            }
         }
+        this.jTextField1.setText("");
+        this.jTextField2.setText("");
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
