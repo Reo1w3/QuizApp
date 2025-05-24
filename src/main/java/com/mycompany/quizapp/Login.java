@@ -5,6 +5,7 @@
 package com.mycompany.quizapp;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -19,11 +20,48 @@ public class Login extends javax.swing.JFrame {
     String nombre;
     String codigo;
     
+    private void tempuser(){
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "INSERT INTO temp_user VALUES ('" + codigo + "', '" + nombre + "');";
+        
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.execute();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    public void delete_tempuser(){
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "DELETE FROM temp_user;";
+        
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.execute();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
     private void login(){
         conexion instancia = new conexion();
         Connection conn = instancia.con();
         String sql = "INSERT INTO usuario VALUES ('" + codigo + "', '" + nombre + "');";
-
+        
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.execute();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+        ventananewuser();
         
     }
     
@@ -40,12 +78,18 @@ public class Login extends javax.swing.JFrame {
            
            x = codigo == null ? sqlcodigo == null : codigo.equals(sqlcodigo);
            
-           
+           conn.close();
        } catch (SQLException e) { 
            System.out.println(e.getMessage());
        }
         
         return x;
+    }
+    
+    private void ventananewuser(){
+        JOptionPane.showMessageDialog(rootPane, "Nuevo usuario agregado correctamente\n                      Bienvenido");
+        new Menu().setVisible(true);
+        this.setVisible(false);
     }
     
     private void ventana(){
@@ -54,12 +98,19 @@ public class Login extends javax.swing.JFrame {
         this.setVisible(false);
     }
     
+    
+    
     /**
      * Creates new form Login
      */
     public Login() {
         initComponents();
         this.setLocationRelativeTo(this);
+        this.jLabel1.setFont(new Menu().titulo);
+        this.jLabel2.setFont(new Menu().texto);
+        this.jLabel3.setFont(new Menu().texto);
+        this.jButton1.setFont(new Menu().boton);
+        this.jButton2.setFont(new Menu().boton);
     }
 
     /**
@@ -114,22 +165,21 @@ public class Login extends javax.swing.JFrame {
                         .addContainerGap(550, Short.MAX_VALUE)
                         .addComponent(jButton2))
                     .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(139, 139, 139)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(139, 139, 139)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel2)
-                                    .addComponent(jLabel3))
-                                .addGap(44, 44, 44)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jTextField2)
-                                    .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 217, Short.MAX_VALUE)))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(298, 298, 298)
-                                .addComponent(jLabel1)))
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel3))
+                        .addGap(44, 44, 44)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextField2)
+                            .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 217, Short.MAX_VALUE))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(270, 270, 270)
+                .addComponent(jLabel1)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -173,7 +223,9 @@ public class Login extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
+        
         JOptionPane.showMessageDialog(rootPane, "Nos vemos");
+        
         System.exit(0);
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -181,15 +233,17 @@ public class Login extends javax.swing.JFrame {
         // TODO add your handling code here:
         nombre = this.jTextField1.getText();
         codigo = this.jTextField2.getText();
-        
         if(jTextField1.getText().isBlank() || jTextField2.getText().isBlank()){
             JOptionPane.showMessageDialog(rootPane, "Por favor llenar los campos requeridos");
         } else {
+            delete_tempuser();
+            tempuser();
             if(codigo() == true){
                 ventana();
             } else {
                 login();
             }
+            
         }
         this.jTextField1.setText("");
         this.jTextField2.setText("");

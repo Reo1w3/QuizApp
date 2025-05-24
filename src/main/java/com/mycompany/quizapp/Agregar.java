@@ -4,18 +4,79 @@
  */
 package com.mycompany.quizapp;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author steve
  */
 public class Agregar extends javax.swing.JFrame {
-
+    
+    String correct_ans;
+    String pregunta;
+    
+    private void agregar_qst(){
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "INSERT INTO pregunta VALUES (?, '" + pregunta + "', '" + correct_ans + "');";
+        
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.execute();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    private void agregar_ans(){
+        String opcion1 = this.jTextField1.getText();
+        String opcion2 = this.jTextField2.getText();
+        String opcion3 = this.jTextField3.getText();
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "INSERT INTO respuestas VALUES (?, '" + opcion1 + "', '" + opcion2 + "', '" + opcion3 + "');";
+        
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.execute();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    
+    
+    private void set_correctans(){
+        if(this.jRadioButton1.isSelected()){
+            correct_ans = this.jTextField1.getText();
+        }
+        if(this.jRadioButton2.isSelected()){
+            correct_ans = this.jTextField2.getText();
+        }
+        if(this.jRadioButton3.isSelected()){
+            correct_ans = this.jTextField3.getText();
+        }
+    }
+    
     /**
      * Creates new form Agregar
      */
     public Agregar() {
         initComponents();
         this.setLocationRelativeTo(this);
+        this.jLabel1.setFont(new Menu().titulo);
+        this.jLabel2.setFont(new Menu().texto);
+        this.jLabel3.setFont(new Menu().texto);
+        this.jLabel4.setFont(new Menu().texto);
+        this.jLabel5.setFont(new Menu().texto);
+        this.jButton1.setFont(new Menu().boton);
+        this.jButton3.setFont(new Menu().boton);
+        
     }
 
     /**
@@ -192,8 +253,31 @@ public class Agregar extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         
-        new Menu().setVisible(true);
-        this.setVisible(false);
+        if(this.jTextArea1.getText().isBlank() || this.jTextField1.getText().isBlank() || this.jTextField2.getText().isBlank() || this.jTextField3.getText().isBlank()){
+            
+            JOptionPane.showMessageDialog(rootPane, "Llene todos los datos");
+            
+        } else {
+            
+            if(!(this.jRadioButton1.isSelected() || this.jRadioButton2.isSelected() || this.jRadioButton3.isSelected())){
+                
+                JOptionPane.showMessageDialog(rootPane, "Elija la opcion correcta");
+                
+            } else {
+                this.pregunta = this.jTextArea1.getText();
+                set_correctans();
+                agregar_ans();
+                agregar_qst();
+                
+                JOptionPane.showMessageDialog(rootPane, "Pregunta agregada correctamente");
+        
+                new Menu().setVisible(true);
+                this.setVisible(false);
+            
+            }
+            
+        }
+       
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**

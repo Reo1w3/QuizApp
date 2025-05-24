@@ -4,18 +4,52 @@
  */
 package com.mycompany.quizapp;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author steve
  */
 public class Resultados extends javax.swing.JFrame {
-
+    
+    DefaultTableModel tabla = new DefaultTableModel();
+    
+    private void get_result(){
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "SELECT * FROM resultado";
+        
+        try{
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            
+        while(rs.next()) {
+            String id = rs.getString("id");
+            String nombre = rs.getString("nombre");
+            String resultado = rs.getString("numero_correct");
+            tabla.addRow(new Object[]{id, nombre, resultado});
+            
+        }
+        
+        jTable1.setModel(tabla);
+        
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
     /**
      * Creates new form Resultados
      */
     public Resultados() {
         initComponents();
         this.setLocationRelativeTo(this);
+        this.jLabel1.setFont(new Menu().titulo);
+        this.jButton1.setFont(new Menu().boton);
+        get_result();
     }
 
     /**
@@ -64,10 +98,6 @@ public class Resultados extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(281, 281, 281)
-                .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 616, Short.MAX_VALUE)
@@ -75,6 +105,10 @@ public class Resultados extends javax.swing.JFrame {
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton1)))
                 .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(201, 201, 201)
+                .addComponent(jLabel1)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

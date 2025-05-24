@@ -4,18 +4,306 @@
  */
 package com.mycompany.quizapp;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
+
+
 /**
  *
  * @author steve
  */
 public class Resolver extends javax.swing.JFrame {
 
+    int numero_pregunta;
+    int numero_respuesta;
+    String correct_ans;
+    String codigo = get_id();
+    String usuario = get_user();
+    
+    private void get_qst(){
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "SELECT * FROM pregunta;";
+        String sql2 = "SELECT * FROM respuestas;";
+        
+       try {
+           Statement stmt = conn.createStatement();
+           ResultSet rs = stmt.executeQuery(sql); 
+           
+           numero_pregunta = rs.getInt("numero_pregunta");
+           String pregunta = rs.getString("texto_pregunta");
+           correct_ans = rs.getString("respuesta_correcta");
+           
+           ResultSet rs2 = stmt.executeQuery(sql2);
+           
+           numero_respuesta = rs2.getInt("numero_pregunta");
+           String opcion1 = rs2.getString("opcion1");
+           String opcion2 = rs2.getString("opcion2");
+           String opcion3 = rs2.getString("opcion3");
+           
+           this.jTextArea2.setText(pregunta);
+           this.jTextField1.setText(opcion1);
+           this.jTextField2.setText(opcion2);
+           this.jTextField3.setText(opcion3);
+           
+           conn.close();
+       } catch (SQLException e) { 
+           System.out.println(e.getMessage());
+       }
+       
+    }
+    
+    private void next_qst(){
+        
+        numero_pregunta = numero_pregunta + 1;
+        numero_respuesta = numero_respuesta + 1;
+        
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "SELECT * FROM pregunta WHERE numero_pregunta = '" + numero_pregunta + "';";
+        String sql2 = "SELECT * FROM respuestas WHERE numero_pregunta = '" + numero_pregunta + "';;";
+        
+       try {
+           Statement stmt = conn.createStatement();
+           ResultSet rs = stmt.executeQuery(sql); 
+           
+           numero_pregunta = rs.getInt("numero_pregunta");
+           String pregunta = rs.getString("texto_pregunta");
+           correct_ans = rs.getString("respuesta_correcta");
+           
+           ResultSet rs2 = stmt.executeQuery(sql2);
+           
+           numero_respuesta = rs2.getInt("numero_pregunta");
+           String opcion1 = rs2.getString("opcion1");
+           String opcion2 = rs2.getString("opcion2");
+           String opcion3 = rs2.getString("opcion3");
+           
+           this.jTextArea2.setText(pregunta);
+           this.jTextField1.setText(opcion1);
+           this.jTextField2.setText(opcion2);
+           this.jTextField3.setText(opcion3);
+           
+       } catch (SQLException e) { 
+           System.out.println(e.getMessage());
+       }
+       
+       if(last_qst() == true){
+           
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+       }
+    }
+    
+    private String get_id(){
+        String sqlcodigo = null;
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "SELECT id FROM temp_user;";
+        
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            sqlcodigo = rs.getString("id");
+            
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return sqlcodigo;
+    }
+    
+    private String get_user(){
+        String sqlnombre = null;
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "SELECT nombre FROM temp_user;";
+        
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            sqlnombre = rs.getString("nombre");
+            
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return sqlnombre;
+    }
+    
+    private int get_suma(){
+        int x = 0;
+        
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "SELECT is_correct FROM cuestionario;";
+        
+        try{
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            
+            while(rs.next()){
+                int temp = rs.getInt("is_correct");
+                x = x + temp;
+            }
+            conn.close();
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        
+        return x;
+        
+    }
+    
+    private boolean last_qst(){
+        boolean x = false;
+        
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "SELECT numero_pregunta FROM pregunta WHERE numero_pregunta = (SELECT MAX(numero_pregunta) FROM pregunta);";
+        
+        try {
+           Statement stmt = conn.createStatement();
+           ResultSet rs = stmt.executeQuery(sql); 
+           int sqlcodigo = rs.getInt("numero_pregunta");
+           
+           x = numero_pregunta == sqlcodigo;
+           
+           conn.close();
+        } catch (SQLException e) { 
+           System.out.println(e.getMessage());
+        }
+        
+        return x;
+    }
+    
+    /*private void set_suma(){
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "INSERT INTO cuestionario VALUES (?, 0, '" + get_suma() + "');";
+        
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.execute();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    private String get_ncorrect(){
+        String x = null;
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "SELECT * FROM cuestionario WHERE suma = (SELECT MAX(suma) FROM cuestionario);";
+        
+        try{
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            set_suma();
+            x= rs.getString("suma");
+            conn.close();
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return x;
+    } */
+    
+    private void set_result(){
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "INSERT INTO resultado VALUES('" + codigo + "', '" + usuario + "', " + get_suma() + ");";
+        
+        
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.execute();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    private void temp_result(){
+        boolean x;
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = null;
+        
+        x = correct_ans == null ? get_ans() == null : correct_ans.equals(get_ans());
+        
+        if (x == true){
+            sql = "INSERT INTO cuestionario VALUES (?, 1, ?);";
+        } else {
+            sql = "INSERT INTO cuestionario VALUES (?, 0, ?);";
+        }
+        
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.execute();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+    }
+    
+    private String get_ans(){
+        String x = null;
+        
+        if(this.jRadioButton1.isSelected()){
+            x = this.jTextField1.getText();
+        }
+        if(this.jRadioButton2.isSelected()){
+            x = this.jTextField2.getText();
+        }
+        if(this.jRadioButton3.isSelected()){
+            x = this.jTextField3.getText();
+        }
+        
+        return x;
+    }
+    
+    private void erase_tempresult(){
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "DELETE FROM cuestionario;";
+        
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.execute();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());            
+        }
+    }
+    
+    
+    
     /**
      * Creates new form Resolver
      */
     public Resolver() {
         initComponents();
         this.setLocationRelativeTo(this);
+        this.get_qst();
+        this.jLabel1.setFont(new Menu().titulo);
+        this.jLabel2.setFont(new Menu().texto);
+        this.jLabel3.setFont(new Menu().texto);
+        this.jLabel4.setFont(new Menu().texto);
+        this.jButton1.setFont(new Menu().boton);
+        this.jButton3.setFont(new Menu().boton);
+        this.jButton4.setFont(new Menu().boton);
+        erase_tempresult();
     }
 
     /**
@@ -71,7 +359,7 @@ public class Resolver extends javax.swing.JFrame {
             }
         });
 
-        jButton4.setText("Regresar");
+        jButton4.setText("Entregar");
         jButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton4ActionPerformed(evt);
@@ -93,21 +381,18 @@ public class Resolver extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addContainerGap()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGap(51, 51, 51)
                                         .addComponent(jButton1)
-                                        .addGap(71, 71, 71)
-                                        .addComponent(jButton4)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                        .addContainerGap()
-                                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(14, 14, 14)))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jButton4))
+                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(14, 14, 14)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addComponent(jRadioButton2)
@@ -128,9 +413,9 @@ public class Resolver extends javax.swing.JFrame {
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(408, 408, 408)
                                 .addComponent(jLabel1)))
-                        .addGap(0, 13, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGap(0, 41, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton3)))
                 .addContainerGap())
         );
@@ -201,10 +486,32 @@ public class Resolver extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
+        if(last_qst() == true){
+            JOptionPane.showMessageDialog(rootPane, "Esta es la ultima pregunta");
+        } else {
+            get_ans();
+            temp_result();
+            this.jTextArea2.setText("");
+            this.jTextField1.setText("");
+            this.jTextField2.setText("");
+            this.jTextField3.setText("");
+            next_qst();
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
+        if(last_qst() == true && (this.jRadioButton1.isSelected() || this.jRadioButton2.isSelected() || this.jRadioButton3.isSelected())){
+            JOptionPane.showMessageDialog(rootPane, "Buen trabajo");
+            get_ans();
+            temp_result();
+            set_result();
+            new Menu().setVisible(true);
+            this.setVisible(false);
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Aun no se ha completado el cuestionario");
+        }
+        
     }//GEN-LAST:event_jButton4ActionPerformed
 
     /**
