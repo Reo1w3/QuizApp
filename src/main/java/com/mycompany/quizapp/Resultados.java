@@ -20,9 +20,8 @@ public class Resultados extends javax.swing.JFrame {
     
     DefaultTableModel tabla = new DefaultTableModel();
     
-    int result;
-    private int n_ans(){
-        int x = 0;
+    private float n_ans(){
+        float x = 0;
         conexion instancia = new conexion();
         Connection conn = instancia.con();
         String sql = "SELECT COUNT(*) FROM pregunta;";
@@ -32,7 +31,7 @@ public class Resultados extends javax.swing.JFrame {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             x = rs.getInt(1);
-            
+            conn.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -58,7 +57,7 @@ public class Resultados extends javax.swing.JFrame {
         return x;
     }*/
     
-    private float set_result(){
+    private float set_result(float result){
         float x;
         float y;
         
@@ -81,14 +80,14 @@ public class Resultados extends javax.swing.JFrame {
         while(rs.next()) {
             String id = rs.getString("id");
             String nombre = rs.getString("nombre");
-            result = rs.getInt("numero_correct");
-            String resultado = set_result() + "%";
+            float result = rs.getInt("numero_correct");
+            String resultado = set_result(result) + "%";
             tabla.addRow(new Object[]{id, nombre, resultado});
             
         }
         
         tabla1.setModel(tabla);
-        
+        conn.close();
         } catch (SQLException e){
             System.out.println(e.getMessage());
         }
