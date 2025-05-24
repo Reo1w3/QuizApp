@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -18,10 +20,59 @@ public class Resultados extends javax.swing.JFrame {
     
     DefaultTableModel tabla = new DefaultTableModel();
     
-    private void get_result(){
+    int result;
+    private int n_ans(){
+        int x = 0;
         conexion instancia = new conexion();
         Connection conn = instancia.con();
-        String sql = "SELECT * FROM resultado";
+        String sql = "SELECT COUNT(*) FROM pregunta;";
+        
+        
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            x = rs.getInt(1);
+            
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+          
+        return x;
+    }
+    
+    /*private int get_result(){
+        int x = 0;
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "SELECT numero_correct FROM resultado;";
+        
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            x = rs.getInt("numero_correct");
+            
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+        return x;
+    }*/
+    
+    private float set_result(){
+        float x;
+        float y;
+        
+        y = result / n_ans();
+        
+        x = y * 100;
+        
+        return x;
+    }
+    
+    private void get_table(){
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "SELECT * FROM resultado;";
         
         try{
             Statement stmt = conn.createStatement();
@@ -30,12 +81,13 @@ public class Resultados extends javax.swing.JFrame {
         while(rs.next()) {
             String id = rs.getString("id");
             String nombre = rs.getString("nombre");
-            String resultado = rs.getString("numero_correct");
+            result = rs.getInt("numero_correct");
+            String resultado = set_result() + "%";
             tabla.addRow(new Object[]{id, nombre, resultado});
             
         }
         
-        jTable1.setModel(tabla);
+        tabla1.setModel(tabla);
         
         } catch (SQLException e){
             System.out.println(e.getMessage());
@@ -49,7 +101,11 @@ public class Resultados extends javax.swing.JFrame {
         this.setLocationRelativeTo(this);
         this.jLabel1.setFont(new Menu().titulo);
         this.jButton1.setFont(new Menu().boton);
-        get_result();
+        tabla.addColumn("ID");
+        tabla.addColumn("NOMBRE");
+        tabla.addColumn("RESULTADO");
+        tabla1.setModel(tabla);
+        get_table();
     }
 
     /**
@@ -64,7 +120,7 @@ public class Resultados extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tabla1 = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -73,7 +129,7 @@ public class Resultados extends javax.swing.JFrame {
 
         jLabel1.setText("Resultados");
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tabla1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {},
                 {},
@@ -84,7 +140,7 @@ public class Resultados extends javax.swing.JFrame {
 
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tabla1);
 
         jButton1.setText("Regresar");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -106,7 +162,7 @@ public class Resultados extends javax.swing.JFrame {
                         .addComponent(jButton1)))
                 .addContainerGap())
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(201, 201, 201)
+                .addGap(228, 228, 228)
                 .addComponent(jLabel1)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -116,8 +172,8 @@ public class Resultados extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel1)
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 253, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 26, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 58, Short.MAX_VALUE)
                 .addComponent(jButton1)
                 .addContainerGap())
         );
@@ -188,6 +244,6 @@ public class Resultados extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable tabla1;
     // End of variables declaration//GEN-END:variables
 }
