@@ -237,9 +237,9 @@ public class Resolver extends javax.swing.JFrame {
             ResultSet rs = stmt.executeQuery(sql);
             String id = rs.getString("id");
             String nombre = rs.getString("nombre");
-            int result = rs.getInt(4);
-            float y = (result * 100) / n_ans();
-            String resultado = y + "%";
+            float result = rs.getInt(4);
+            float y = (result / n_ans()) * 100;
+            String resultado = String.format("%.2f", y) + "%";
             x = "'" + id + "', '" + nombre + "', '" + resultado + "'";
             conn.close();
         } catch (SQLException e) {
@@ -248,8 +248,8 @@ public class Resolver extends javax.swing.JFrame {
         return x;
     }
     
-    public int n_ans(){
-        int x = 0;
+    public float n_ans(){
+        float x = 0;
         conexion instancia = new conexion();
         Connection conn = instancia.con();
         String sql = "SELECT COUNT(*) FROM pregunta;";
@@ -538,6 +538,7 @@ public class Resolver extends javax.swing.JFrame {
         if(last_qst() == true){
             JOptionPane.showMessageDialog(rootPane, "Esta es la ultima pregunta");
         } else {
+            if (this.jRadioButton1.isSelected() || this.jRadioButton2.isSelected() || this.jRadioButton3.isSelected()){
             get_ans();
             temp_result();
             this.jTextArea2.setText("");
@@ -545,6 +546,10 @@ public class Resolver extends javax.swing.JFrame {
             this.jTextField2.setText("");
             this.jTextField3.setText("");
             next_qst();
+            this.buttonGroup1.clearSelection();
+            } else {
+                JOptionPane.showMessageDialog(rootPane, "Elija una opcion");
+            }
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
