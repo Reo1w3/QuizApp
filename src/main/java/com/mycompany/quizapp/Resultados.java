@@ -20,24 +20,30 @@ public class Resultados extends javax.swing.JFrame {
     
     DefaultTableModel tabla = new DefaultTableModel();
     
-    int result;
-    private int n_ans(){
-        int x = 0;
+    
+    
+    private void get_table(){
         conexion instancia = new conexion();
         Connection conn = instancia.con();
-        String sql = "SELECT COUNT(*) FROM pregunta;";
+        String sql = "SELECT * FROM result_final;";
         
-        
-        try {
+        try{
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            x = rs.getInt(1);
             
-        } catch (SQLException e) {
+        while(rs.next()) {
+            String id = rs.getString("id");
+            String nombre = rs.getString("nombre");
+            String resultado = rs.getString("numero_correct");
+            tabla.addRow(new Object[]{id, nombre, resultado});
+            
+        }
+        
+        tabla1.setModel(tabla);
+        conn.close();
+        } catch (SQLException e){
             System.out.println(e.getMessage());
         }
-          
-        return x;
     }
     
     /*private int get_result(){
@@ -58,41 +64,6 @@ public class Resultados extends javax.swing.JFrame {
         return x;
     }*/
     
-    private float set_result(){
-        float x;
-        float y;
-        
-        y = result / n_ans();
-        
-        x = y * 100;
-        
-        return x;
-    }
-    
-    private void get_table(){
-        conexion instancia = new conexion();
-        Connection conn = instancia.con();
-        String sql = "SELECT * FROM resultado;";
-        
-        try{
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            
-        while(rs.next()) {
-            String id = rs.getString("id");
-            String nombre = rs.getString("nombre");
-            result = rs.getInt("numero_correct");
-            String resultado = set_result() + "%";
-            tabla.addRow(new Object[]{id, nombre, resultado});
-            
-        }
-        
-        tabla1.setModel(tabla);
-        
-        } catch (SQLException e){
-            System.out.println(e.getMessage());
-        }
-    }
     /**
      * Creates new form Resultados
      */

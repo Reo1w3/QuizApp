@@ -41,12 +41,12 @@ public class Resolver extends javax.swing.JFrame {
            String pregunta = rs.getString("texto_pregunta");
            correct_ans = rs.getString("respuesta_correcta");
            
-           ResultSet rs2 = stmt.executeQuery(sql2);
+           rs = stmt.executeQuery(sql2);
            
-           numero_respuesta = rs2.getInt("numero_pregunta");
-           String opcion1 = rs2.getString("opcion1");
-           String opcion2 = rs2.getString("opcion2");
-           String opcion3 = rs2.getString("opcion3");
+           numero_respuesta = rs.getInt("numero_pregunta");
+           String opcion1 = rs.getString("opcion1");
+           String opcion2 = rs.getString("opcion2");
+           String opcion3 = rs.getString("opcion3");
            
            this.jTextArea2.setText(pregunta);
            this.jTextField1.setText(opcion1);
@@ -67,41 +67,35 @@ public class Resolver extends javax.swing.JFrame {
         
         conexion instancia = new conexion();
         Connection conn = instancia.con();
-        String sql = "SELECT * FROM pregunta WHERE numero_pregunta = '" + numero_pregunta + "';";
+        String sql1 = "SELECT * FROM pregunta WHERE numero_pregunta = '" + numero_pregunta + "';";
         String sql2 = "SELECT * FROM respuestas WHERE numero_pregunta = '" + numero_pregunta + "';;";
         
        try {
            Statement stmt = conn.createStatement();
-           ResultSet rs = stmt.executeQuery(sql); 
+           ResultSet rs = stmt.executeQuery(sql1); 
            
            numero_pregunta = rs.getInt("numero_pregunta");
            String pregunta = rs.getString("texto_pregunta");
            correct_ans = rs.getString("respuesta_correcta");
            
-           ResultSet rs2 = stmt.executeQuery(sql2);
+           rs = stmt.executeQuery(sql2);
            
-           numero_respuesta = rs2.getInt("numero_pregunta");
-           String opcion1 = rs2.getString("opcion1");
-           String opcion2 = rs2.getString("opcion2");
-           String opcion3 = rs2.getString("opcion3");
+           numero_respuesta = rs.getInt("numero_pregunta");
+           String opcion1 = rs.getString("opcion1");
+           String opcion2 = rs.getString("opcion2");
+           String opcion3 = rs.getString("opcion3");
            
            this.jTextArea2.setText(pregunta);
            this.jTextField1.setText(opcion1);
            this.jTextField2.setText(opcion2);
            this.jTextField3.setText(opcion3);
            
+           conn.close();
+           
        } catch (SQLException e) { 
            System.out.println(e.getMessage());
        }
        
-       if(last_qst() == true){
-           
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
-       }
     }
     
     private String get_id(){
@@ -221,7 +215,7 @@ public class Resolver extends javax.swing.JFrame {
     private void set_result(){
         conexion instancia = new conexion();
         Connection conn = instancia.con();
-        String sql = "INSERT INTO resultado VALUES('" + codigo + "', '" + usuario + "', " + get_suma() + ");";
+        String sql = "INSERT INTO resultado VALUES(?, '" + codigo + "', '" + usuario + "', " + get_suma() + ");";
         
         
         try {
@@ -233,11 +227,66 @@ public class Resolver extends javax.swing.JFrame {
         }
     }
     
+    private String get_result(){
+        String x = null;
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "SELECT * FROM resultado WHERE n = (SELECT MAX(n) FROM resultado);";
+        try{
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            String id = rs.getString("id");
+            String nombre = rs.getString("nombre");
+            int result = rs.getInt(4);
+            float y = (result * 100) / n_ans();
+            String resultado = y + "%";
+            x = "'" + id + "', '" + nombre + "', '" + resultado + "'";
+            conn.close();
+        } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        return x;
+    }
+    
+    public int n_ans(){
+        int x = 0;
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "SELECT COUNT(*) FROM pregunta;";
+        
+        
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            x = rs.getInt(1);
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+          
+        return x;
+    }
+    
+    
+    private void set_table(){
+        conexion instancia = new conexion();
+        Connection conn = instancia.con();
+        String sql = "INSERT INTO result_final VALUES (" + get_result() + ");";
+        
+        try{
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.execute();
+            conn.close();
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+    
     private void temp_result(){
         boolean x;
         conexion instancia = new conexion();
         Connection conn = instancia.con();
-        String sql = null;
+        String sql;
         
         x = correct_ans == null ? get_ans() == null : correct_ans.equals(get_ans());
         
@@ -506,6 +555,8 @@ public class Resolver extends javax.swing.JFrame {
             get_ans();
             temp_result();
             set_result();
+            get_result();
+            set_table();
             new Menu().setVisible(true);
             this.setVisible(false);
         } else {
